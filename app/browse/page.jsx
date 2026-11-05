@@ -4,7 +4,7 @@ import { Search, Flame, Tv, Film, Sparkles, Layers, ChevronLeft, ChevronRight } 
 
 export const revalidate = 60; // Cache on edge for 60 seconds
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 12;
 
 function getPageNumbers(current, total) {
   if (total <= 5) {
