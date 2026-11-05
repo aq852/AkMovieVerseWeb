@@ -13,15 +13,15 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col justify-between">
+      <body className="min-h-screen flex flex-col justify-between overflow-x-hidden w-full max-w-full">
         {/* Navbar */}
-        <header className="sticky top-0 z-50 glass-panel border-b border-white/10 px-4 py-3 sm:px-8">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <Link href="/browse" className="flex items-center gap-2.5 group">
+        <header className="sticky top-0 z-50 glass-panel border-b border-white/10 px-3.5 py-3 sm:px-8 w-full">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <Link href="/browse" className="flex items-center gap-2 group shrink-0">
               <span className="p-2 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
                 <Film className="w-5 h-5" />
               </span>
-              <span className="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-white to-sky-200 bg-clip-text text-transparent">
+              <span className="text-base sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-white to-sky-200 bg-clip-text text-transparent">
                 AkMovieVerse
               </span>
             </Link>
@@ -51,12 +51,12 @@ export default function RootLayout({ children }) {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-8 py-5 sm:py-6 overflow-x-hidden">
           {children}
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-white/5 py-8 text-center text-xs text-slate-500">
+        <footer className="border-t border-white/5 py-8 text-center text-xs text-slate-500 px-4">
           <p>© {new Date().getFullYear()} AkMovieVerse Cinema. Powered by high-speed Edge CDN.</p>
         </footer>
       </body>

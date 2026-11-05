@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getFileDoc, getGroupedCatalog } from "@/lib/data";
 import { parseMediaMetadata, formatSize, getStreamUrl } from "@/lib/helpers";
 import VideoPlayer from "@/components/VideoPlayer";
-import { ArrowLeft, Bot, Tv, Smartphone, Download, Film, Copy } from "lucide-react";
+import { ArrowLeft, Bot, Tv, Smartphone, Download, Film } from "lucide-react";
 
 export const revalidate = 0; // Dynamic streaming watch page
 
@@ -31,7 +31,6 @@ export default async function WatchPage({ params }) {
   const vlcIntent = `intent://${cleanUrl}#Intent;action=android.intent.action.VIEW;scheme=${protocol};type=video/*;package=org.videolan.vlc;S.title=${safeTitle};end`;
   const mxIntent = `intent://${cleanUrl}#Intent;action=android.intent.action.VIEW;scheme=${protocol};type=video/*;package=com.mxtech.videoplayer.ad;S.title=${safeTitle};end`;
   const chooserIntent = `intent://${cleanUrl}#Intent;action=android.intent.action.VIEW;scheme=${protocol};type=video/*;S.title=${safeTitle};end`;
-  const vlcDirect = `vlc://${streamUrl}`;
   const m3uUrl = `/api/playlist/${fileId}`;
 
   // Get related movies
@@ -39,7 +38,7 @@ export default async function WatchPage({ params }) {
   const related = catalog.slice(0, 6);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-5 sm:space-y-6 max-w-5xl w-full mx-auto min-w-0">
       {/* Back button */}
       <div>
         <Link
@@ -55,28 +54,28 @@ export default async function WatchPage({ params }) {
       <VideoPlayer streamUrl={streamUrl} title={fileName} />
 
       {/* Under Player Media Info */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-7 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs">
+      <div className="glass-panel rounded-3xl p-4 sm:p-7 space-y-4 w-full min-w-0">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs">
             📦 {sizeStr}
           </span>
           {meta.quality && (
-            <span className="px-3 py-1 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold text-xs">
+            <span className="px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold text-xs">
               🎬 {meta.quality}
             </span>
           )}
           {meta.badges?.map((b) => (
-            <span key={b} className="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs">
+            <span key={b} className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs border border-white/5">
               {b}
             </span>
           ))}
-          <span className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs">
+          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs">
             ⚡ Direct Stream
           </span>
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-white break-words">
-          {fileName}
+        <h1 className="text-base sm:text-2xl font-bold text-white break-all sm:break-words">
+          {fileName.replace(/_/g, " ")}
         </h1>
 
         {/* External Player Buttons */}
@@ -85,45 +84,45 @@ export default async function WatchPage({ params }) {
             🚀 Open In External Player (Fast Hardware Decoding)
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
             <a
               href={vlcIntent}
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/20 transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/20 transition-all active:scale-95"
             >
               <span>🧡 VLC Player</span>
             </a>
 
             <a
               href={mxIntent}
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95"
             >
               <span>🍿 MX Player</span>
             </a>
 
             <a
               href={chooserIntent}
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
             >
-              <Smartphone className="w-4 h-4" />
-              <span>Any Installed App</span>
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Any App</span>
             </a>
 
             <a
               href={m3uUrl}
               download
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-panel hover:bg-slate-800 text-slate-200 font-bold text-xs transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl glass-panel hover:bg-slate-800 text-slate-200 font-bold text-xs transition-all active:scale-95 border border-white/10"
             >
-              <Tv className="w-4 h-4 text-purple-400" />
-              <span>Download M3U (PC / TV)</span>
+              <Tv className="w-3.5 h-3.5 text-purple-400" />
+              <span>M3U Playlist</span>
             </a>
           </div>
 
-          <div className="pt-2 flex flex-wrap gap-2.5">
+          <div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-2.5">
             <a
               href={`https://t.me/${botUsername}?start=file_${fileId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-semibold text-xs transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-400 font-semibold text-xs transition-all active:scale-95"
             >
               <Bot className="w-4 h-4" />
               <span>Download In Telegram Bot</span>
@@ -131,7 +130,7 @@ export default async function WatchPage({ params }) {
 
             <a
               href={`${streamUrl}?download=1`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white font-semibold text-xs transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl glass-panel text-slate-300 hover:text-white font-semibold text-xs transition-all active:scale-95 border border-white/10"
             >
               <Download className="w-4 h-4 text-emerald-400" />
               <span>Direct Browser Download</span>
@@ -141,13 +140,13 @@ export default async function WatchPage({ params }) {
       </div>
 
       {/* Related Movies */}
-      <div className="space-y-4 pt-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Film className="w-5 h-5 text-sky-400" />
+      <div className="space-y-3 pt-3">
+        <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <Film className="w-4 h-4 text-sky-400" />
           <span>More Movies & Series</span>
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
           {related.map((rel) => (
             <Link
               key={rel.slug}
@@ -158,11 +157,13 @@ export default async function WatchPage({ params }) {
                 <img
                   src={rel.posterUrl}
                   alt={rel.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <div className="p-2 text-[11px] font-bold text-white truncate">
-                {rel.title}
+              <div className="p-2">
+                <h3 className="text-xs font-semibold text-white line-clamp-1 group-hover:text-sky-400 transition-colors">
+                  {rel.title}
+                </h3>
               </div>
             </Link>
           ))}
