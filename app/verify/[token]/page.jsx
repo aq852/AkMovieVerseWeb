@@ -1,4 +1,4 @@
-import { getDb } from "@/lib/mongodb";
+import { getAllDatabases } from "@/lib/mongodb";
 import { ShieldCheck, Lock, ArrowRight, Bot } from "lucide-react";
 import VerifyRedirectClient from "./VerifyRedirectClient";
 
@@ -6,18 +6,22 @@ export const revalidate = 0; // Dynamic token lookup
 
 export default async function VerifyGatewayPage({ params }) {
   const token = params.token;
-  const db = await getDb();
+  const dbs = await getAllDatabases();
   let targetUrl = null;
   const botUsername = process.env.BOT_USERNAME || "TheFlixifyBot";
 
-  if (db && token) {
-    try {
-      const doc = await db.collection("verify").findOne({ token });
-      if (doc) {
-        targetUrl = doc.short_link;
+  if (dbs && token) {
+    for (const db of dbs) {
+      for (const col of ["verifications", "verify"]) {
+        try {
+          const doc = await db.collection(col).findOne({ token });
+          if (doc && doc.short_link) {
+            targetUrl = doc.short_link;
+            break;
+          }
+        } catch (err) {}
       }
-    } catch (err) {
-      console.error("Error looking up verify token:", err);
+      if (targetUrl) break;
     }
   }
 
