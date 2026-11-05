@@ -1,13 +1,33 @@
 import Link from "next/link";
 import { getGroupedCatalog } from "@/lib/data";
-import { Search, Flame, Tv, Film, Sparkles, Layers } from "lucide-react";
+import { Search, Flame, Tv, Film, Sparkles, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const revalidate = 60; // Cache on edge for 60 seconds
+
+const ITEMS_PER_PAGE = 20;
+
+function getPageNumbers(current, total) {
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages = [];
+  pages.push(1);
+  if (current > 3) pages.push("...");
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  if (current < total - 2) pages.push("...");
+  pages.push(total);
+  return pages;
+}
 
 export default async function BrowsePage({ searchParams }) {
   const query = (searchParams?.q || "").toLowerCase().trim();
   const filter = (searchParams?.filter || "all").toLowerCase().trim();
   const qualityFilter = (searchParams?.quality || "").toLowerCase().trim();
+  const page = Math.max(1, parseInt(searchParams?.page || "1", 10));
 
   const allItems = await getGroupedCatalog();
 
@@ -31,8 +51,24 @@ export default async function BrowsePage({ searchParams }) {
     return true;
   });
 
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const pageNumbers = getPageNumbers(currentPage, totalPages);
+
+  function buildPageUrl(pageNum) {
+    const params = new URLSearchParams();
+    if (searchParams?.q) params.set("q", searchParams.q);
+    if (filter && filter !== "all") params.set("filter", filter);
+    if (qualityFilter) params.set("quality", qualityFilter);
+    if (pageNum > 1) params.set("page", String(pageNum));
+    const qs = params.toString();
+    return `/browse${qs ? `?${qs}` : ""}`;
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       {/* Search Bar */}
       <div className="relative max-w-2xl mx-auto">
         <form action="/browse" method="GET" className="flex items-center gap-2">
@@ -119,11 +155,18 @@ export default async function BrowsePage({ searchParams }) {
       </div>
 
       {/* Results Header */}
-      <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
+      <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
         <span>
-          Showing <b className="text-white">{filtered.length}</b> titles
+          Showing <b className="text-white">{filtered.length > 0 ? startIndex + 1 : 0}</b> -{" "}
+          <b className="text-white">{Math.min(startIndex + ITEMS_PER_PAGE, filtered.length)}</b> of{" "}
+          <b className="text-white">{filtered.length}</b> titles
           {query ? ` for "${query}"` : ""}
         </span>
+        {totalPages > 1 && (
+          <span className="font-semibold text-slate-400">
+            Page <b className="text-white">{currentPage}</b> of {totalPages}
+          </span>
+        )}
       </div>
 
       {/* Movie Cards Grid */}
@@ -140,15 +183,14 @@ export default async function BrowsePage({ searchParams }) {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-5">
-          {filtered.map((item) => {
-            const firstFile = item.files[0];
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+          {paginated.map((item) => {
             const detailUrl = `/post/${item.slug}`;
 
             return (
               <div
                 key={item.slug}
-                className="group flex flex-col justify-between rounded-2xl overflow-hidden glass-panel hover:border-sky-500/40 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10"
+                className="group flex flex-col justify-between rounded-2xl overflow-hidden glass-panel hover:border-sky-500/40 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-sky-500/10 min-w-0"
               >
                 <div>
                   {/* Poster Thumbnail */}
@@ -174,7 +216,7 @@ export default async function BrowsePage({ searchParams }) {
                     </div>
 
                     {/* Bottom Info Pill */}
-                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] font-semibold text-white/90 bg-slate-950/75 backdrop-blur-md px-2 py-1 rounded-lg">
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] font-semibold text-white/90 bg-slate-950/80 backdrop-blur-md px-2 py-1 rounded-lg">
                       <span className="flex items-center gap-1">
                         <Layers className="w-3 h-3 text-sky-400" />
                         {item.fileCount} {item.fileCount > 1 ? "Files" : "File"}
@@ -184,10 +226,10 @@ export default async function BrowsePage({ searchParams }) {
                   </Link>
 
                   {/* Title */}
-                  <div className="p-3">
+                  <div className="p-2.5 sm:p-3">
                     <Link
                       href={detailUrl}
-                      className="block text-xs sm:text-sm font-bold text-white hover:text-sky-400 line-clamp-2 transition-colors"
+                      className="block text-xs sm:text-sm font-bold text-white hover:text-sky-400 line-clamp-2 transition-colors break-words"
                       title={item.title}
                     >
                       {item.title}
@@ -196,10 +238,10 @@ export default async function BrowsePage({ searchParams }) {
                 </div>
 
                 {/* Card Action Button */}
-                <div className="p-3 pt-0">
+                <div className="p-2.5 sm:p-3 pt-0">
                   <Link
                     href={detailUrl}
-                    className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-red-600/20 transition-all active:scale-95"
+                    className="w-full py-2 px-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-md shadow-red-600/20 transition-all active:scale-95"
                   >
                     {item.isSeries ? "📦 View Series" : "▶ Watch & Download"}
                   </Link>
@@ -207,6 +249,74 @@ export default async function BrowsePage({ searchParams }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Bar */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/5">
+          <div className="text-xs text-slate-400">
+            Page <b className="text-white">{currentPage}</b> of <b className="text-white">{totalPages}</b>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap justify-center">
+            {/* Previous Page */}
+            {currentPage > 1 ? (
+              <Link
+                href={buildPageUrl(currentPage - 1)}
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl glass-panel text-slate-300 hover:text-white hover:border-sky-500/40 text-xs font-semibold transition-all active:scale-95"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Prev</span>
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-3 py-2 rounded-xl glass-panel text-slate-600 text-xs font-semibold cursor-not-allowed opacity-50">
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Prev</span>
+              </span>
+            )}
+
+            {/* Page Numbers */}
+            {pageNumbers.map((p, idx) => {
+              if (p === "...") {
+                return (
+                  <span key={`ellipsis-${idx}`} className="px-2 py-1 text-slate-500 text-xs">
+                    ...
+                  </span>
+                );
+              }
+              const isCurrent = p === currentPage;
+              return (
+                <Link
+                  key={p}
+                  href={buildPageUrl(p)}
+                  className={`min-w-[36px] h-9 flex items-center justify-center rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                    isCurrent
+                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/25"
+                      : "glass-panel text-slate-300 hover:text-white hover:border-sky-500/40"
+                  }`}
+                >
+                  {p}
+                </Link>
+              );
+            })}
+
+            {/* Next Page */}
+            {currentPage < totalPages ? (
+              <Link
+                href={buildPageUrl(currentPage + 1)}
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl glass-panel text-slate-300 hover:text-white hover:border-sky-500/40 text-xs font-semibold transition-all active:scale-95"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-3 py-2 rounded-xl glass-panel text-slate-600 text-xs font-semibold cursor-not-allowed opacity-50">
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>
