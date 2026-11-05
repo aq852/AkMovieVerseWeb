@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getFileDoc, getGroupedCatalog } from "@/lib/data";
 import { parseMediaMetadata, formatSize, getStreamUrl } from "@/lib/helpers";
 import VideoPlayer from "@/components/VideoPlayer";
+import CopyStreamButton from "@/components/CopyStreamButton";
 import { ArrowLeft, Bot, Tv, Smartphone, Download, Film } from "lucide-react";
 
 export const revalidate = 0; // Dynamic streaming watch page
@@ -84,7 +85,7 @@ export default async function WatchPage({ params }) {
             🚀 Open In External Player (Fast Hardware Decoding)
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-2.5">
             <a
               href={vlcIntent}
               className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-600/20 transition-all active:scale-95"
@@ -111,10 +112,13 @@ export default async function WatchPage({ params }) {
               href={m3uUrl}
               download
               className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl glass-panel hover:bg-slate-800 text-slate-200 font-bold text-xs transition-all active:scale-95 border border-white/10"
+              title="Download M3U Playlist file for PC / VLC / Smart TV"
             >
               <Tv className="w-3.5 h-3.5 text-purple-400" />
               <span>M3U Playlist</span>
             </a>
+
+            <CopyStreamButton streamUrl={streamUrl} />
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-2.5">
